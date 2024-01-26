@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 
-def send_email(aniversariantes):
+def send_email(lista_emails):
     pass
 
 df = pd.read_pickle('aniversarios.pkl')
@@ -17,4 +17,5 @@ aniversariantes = df[ df['DATA'] == hoje]
 print(aniversariantes)
 
 if not aniversariantes.empty:
-    pass
+    lista_emails = aniversariantes['EMAIL'].tolist()
+    send_email(lista_emails)
