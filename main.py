@@ -16,8 +16,6 @@ def send_birthday_email(lista_emails):
 df = pd.read_pickle('aniversarios.pkl')
 hoje = datetime.now().date()
 
-df['EMAIL'] = [f'colaborador{i}@gmail.com' for i in range( len(df) )]
-
 print(df)
 
 df.iloc[5,1] = hoje
