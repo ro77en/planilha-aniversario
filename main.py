@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import win32com.client as win32
+from PIL import Image, ImageDraw, ImageFont
 
 def send_birthday_email(lista_emails):
     outlook = win32.Dispatch('outlook.application')
@@ -19,6 +20,15 @@ def formatar_texto_cartao(df_aniversariantes):
         setor = linha['SETOR']
         texto_cartao = ' - '.join([nome_formatado, setor])
         return texto_cartao
+    
+def obter_dimensoes_texto(text_string, font):
+    ascent, descent = font.getmetrics()
+    text_width = font.getmask(text_string).getbbox()[2]
+    text_height = font.getmask(text_string).getbbox()[3] + descent
+    return (text_width, text_height)
+
+def criar_cartao(texto, cartao_niver, post_it):
+    pass
 
 df = pd.read_pickle('aniversarios.pkl')
 hoje = datetime.now().date()
