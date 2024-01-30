@@ -3,7 +3,13 @@ from datetime import datetime
 import win32com.client as win32
 from PIL import Image, ImageDraw, ImageFont
 
-def send_birthday_email(lista_emails):
+def send_birthday_email(lista_emails, cartao):
+    """
+    Envia e-mail com um cartão de aniversário contendo os aniversariantes do dia
+
+    :param lista_emails: list (strings com o e-mail dos destinatários)
+    :param cartao:  PIL.Image (cartão de aniversário)
+    """
     outlook = win32.Dispatch('outlook.application')
 
     for email_address in lista_emails:
@@ -14,6 +20,12 @@ def send_birthday_email(lista_emails):
         #email.Send()
 
 def formatar_texto_cartao(df_aniversariantes):
+    """
+    Formata o texto para ser escrito no cartão de aniversário
+
+    :param: df_aniversariantes: pandas.DataFrame (dados dos aniversariantes: nome, setor e e-mail)
+    :returns: texto_cartao: list (strings com "Nome - Setor" dos aniversariantes)
+    """
     texto_cartao = []
     for i, linha in df_aniversariantes.iterrows():
         nome_completo = linha['NOME'].split()
@@ -25,6 +37,14 @@ def formatar_texto_cartao(df_aniversariantes):
 
     
 def obter_dimensoes_texto(text_string, font):
+    """ 
+    Pega as dimensões do texto para escrever no cartão
+
+    :param: text_string: string (texto que será escrito)
+    :param: font: PIL.ImageFont (fonte que será usada no texto)
+
+    :returns: text_width, text_height: Tuple (dimensões do texto)
+    """
     ascent, descent = font.getmetrics()
     text_width = font.getmask(text_string).getbbox()[2]
     text_height = font.getmask(text_string).getbbox()[3] + descent
@@ -32,7 +52,17 @@ def obter_dimensoes_texto(text_string, font):
     return (text_width, text_height)
 
 def criar_cartao(cartao_niver, post_it, fonte, texto_cartao):
-    # cartão
+    """
+    Monta o cartão, sobrepondo o post it com os aniversariantes nele
+
+    :param: cartao_niver: PIL.Image (imagem contendo o cartão inicial)
+    :param: post_it: PIL.Image (contém o post it que terá o texto escrito)
+    :param: fonte: PIL.ImageFont (fonte usada no texto)
+    :param: texto_cartao: list (contem as strings formatadas para escrita)
+
+    :returns: cartao_final: PIL.Image (cartão com post it escrito e sobreposto)
+    """
+
     cartao_niver = cartao_niver.copy()
     post_it = post_it.copy()
 
@@ -61,6 +91,12 @@ def criar_cartao(cartao_niver, post_it, fonte, texto_cartao):
     return (cartao_final)
 
 def sobrepor_camadas(cartao_niver, post_it):
+    """
+    Faz a sobreposição do post it escrito com o cartão de aniversário
+
+    :param: cartao_niver: PIL.Image (cartão de aniversário)
+    :param: post_it: PIL.Image (post it com o texto escrito)
+    """
     layer = Image.new('RGBA', cartao_niver.size, (0,0,0,0))
     layer.paste(post_it, (1000,100))
     layer2 = layer.copy()
@@ -79,10 +115,6 @@ df.iloc[5,1] = hoje
 aniversariantes = df[ df['DATA'] == hoje]
 print(aniversariantes)
 
-if not aniversariantes.empty:
-    lista_emails = df['EMAIL'].tolist()
-    send_birthday_email(lista_emails)
-
 texto_cartao = formatar_texto_cartao(aniversariantes)
 print(texto_cartao)
 
@@ -90,6 +122,9 @@ cartao_niver = Image.open('cartao_niver.png')
 fonte = ImageFont.truetype('FREESCPT.TTF', 55)
 post_it = Image.open('post_it.png')
 
-
 cartao_final = criar_cartao(cartao_niver, post_it, fonte, texto_cartao)
 cartao_final.show()
+
+if not aniversariantes.empty:
+    lista_emails = df['EMAIL'].tolist()
+    send_birthday_email(lista_emails, cartao_final)
